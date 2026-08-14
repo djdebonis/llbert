@@ -1,0 +1,14 @@
+black~=23.3.0
+flake8~=5.0.4
+isort~=5.10.1
+geonamescache==1.6.0
+geopy==2.3.0
+matplotlib==3.5.0
+numpy==1.21.6
+pandas==1.4.0
+sentence-transformers==2.2.2
+torch==2.0.0
+torchaudio==2.0.1
+torchvision==0.15.1
+transformers==4.30.2
+huggingface-hub==0.14.1

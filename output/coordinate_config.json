@@ -1,0 +1,13 @@
+{
+  "coord_mean": [
+    39.6793212890625,
+    -104.95101165771484
+  ],
+  "coord_std": [
+    0.07122788578271866,
+    0.09179546684026718
+  ],
+  "hidden_dim": 256,
+  "dropout": 0.1,
+  "model_name": "sentence-transformers/all-MiniLM-L6-v2"
+}
