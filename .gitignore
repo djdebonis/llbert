@@ -1,0 +1,4 @@
+.DS_Store
+.python-versions
+.venv
+__pycache__

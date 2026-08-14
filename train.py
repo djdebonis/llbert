@@ -148,7 +148,11 @@ def normalize_coordinates(coordinates):
 
 def move_features_to_device(features, device, non_blocking=False):
     return {
-        key: value.to(device, non_blocking=non_blocking)
+        key: (
+            value.to(device, non_blocking=non_blocking)
+            if torch.is_tensor(value)
+            else value
+        )
         for key, value in features.items()
     }
 
@@ -230,8 +234,8 @@ def encode_texts(encoder, texts, batch_size, device):
     embeddings = []
     for start in range(0, len(texts), batch_size):
         batch = texts[start : start + batch_size]
-        features = encoder.tokenize(batch)
-        features = {key: value.to(device) for key, value in features.items()}
+        features = encoder.preprocess(batch)
+        features = move_features_to_device(features, device)
         batch_embeddings = encoder(features)["sentence_embedding"]
         embeddings.append(batch_embeddings.cpu().numpy())
     return np.vstack(embeddings)
@@ -492,7 +496,7 @@ def main():
             pin_memory=pin_memory,
         )
     else:
-        text_collate = TextCollator(encoder.tokenize)
+        text_collate = TextCollator(encoder.preprocess)
         train_loader = make_dataloader(
             train_dataset,
             args.batch_size,
