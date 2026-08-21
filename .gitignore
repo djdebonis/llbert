@@ -2,3 +2,12 @@
 .python-versions
 .venv
 __pycache__
+.venv/
+__pycache__/
+*.pyc
+.hf-cache/
+.matplotlib-cache/
+output/
+training.csv
+predictions.csv
+plots/

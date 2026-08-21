@@ -6,9 +6,3 @@ __pycache__
 .hf-cache
 .matplotlib-cache
 .DS_Store
-
-# keep project source files, but ignore generated local outputs
-output/
-training.csv
-predictions.csv
-plots/
