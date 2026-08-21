@@ -12,3 +12,5 @@ torchaudio==2.0.1
 torchvision==0.15.1
 transformers==4.30.2
 huggingface-hub==0.14.1
+fastapi>=0.110,<1
+uvicorn[standard]>=0.29,<1

@@ -14,6 +14,10 @@ eval: eval.py training.csv
 	@echo "Evaluating coordinate regressor..."
 	@bash -c 'source .venv/bin/activate && python eval.py'
 
+serve: app.py web/index.html
+	@echo "Starting LLBert web app at http://127.0.0.1:8000"
+	@bash -c 'source .venv/bin/activate && uvicorn app:app --reload'
+
 train_frozen_encoder: train.py training.csv
 	@echo "Training coordinate head with frozen encoder..."
 	@bash -c 'source .venv/bin/activate && python train.py --output-path output_frozen_encoder --freeze-encoder --epochs 10'
@@ -78,4 +82,4 @@ clean:
 	@rm -rf output/
 	@rm -f training.csv predictions.csv
 
-.PHONY: data train eval train_frozen_encoder eval_frozen_encoder train_frozen_layers eval_frozen_layers train_mpnet eval_mpnet train_mpnet_finetune eval_mpnet_finetune lint clean all
+.PHONY: data train eval serve train_frozen_encoder eval_frozen_encoder train_frozen_layers eval_frozen_layers train_mpnet eval_mpnet train_mpnet_finetune eval_mpnet_finetune lint clean all

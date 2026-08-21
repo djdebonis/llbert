@@ -3,6 +3,11 @@
 This project fine-tunes a sentence-transformer model to predict a latitude and
 longitude pair from text observed on signs at an intersection.
 
+The name **LLBert** is shorthand for *Linguistic Landscape BERT*: a playful
+reference to the sentence-transformer encoder at the center of the project.
+The model is an experiment in predicting geographic coordinates from the
+language people encounter in public space.
+
 The raw dataset is expected at `training_data_raw.csv`. It may include the
 pandas-exported index column; the preprocessing script only uses:
 
@@ -55,6 +60,59 @@ Or run the full pipeline:
 ```bash
 make
 ```
+
+## Try the model in a web app
+
+Once `output/` contains a trained model, launch the interactive predictor:
+
+```bash
+make serve
+```
+
+**Open prediction** lets you enter a bundle of sign text, provide your own
+latitude and longitude estimate, and compare it with LLBert's prediction. The
+**Random round** mode selects a held-out-style row from `training.csv`, hides
+its coordinates, and scores both your guess and the model. The frontend is
+plain HTML and JavaScript, served by FastAPI, so it can be embedded directly
+in Hugo or deployed as a small app on its own.
+
+## Hosting and Hugo embedding
+
+The recommended architecture is a static Hugo site plus this small FastAPI
+service. You have two deployment options:
+
+- **Direct Hugo integration:** copy `web/index.html` into a Hugo page or
+  shortcode, and set `window.LLBERT_API_URL` before the app script to the API's
+  HTTPS URL.
+- **Subdomain:** deploy the whole app and API together at something like
+  `llbert.example.com`, then embed that URL in Hugo with an iframe.
+
+For a first deployment, Render or Fly.io are a better fit than a static host
+because the model needs Python, PyTorch, and a long-lived process:
+
+1. Push this repository to GitHub, including `app.py`, `web/`, `requirements.txt`,
+  and the trained `output/` directory.
+2. Configure the service command as `uvicorn app:app --host 0.0.0.0 --port $PORT`.
+3. Set `LLBERT_ALLOWED_ORIGINS` to the Hugo site's origin when the frontend is
+  hosted separately. `runtime.txt` selects Python 3.10.
+
+For a Hugo page, the smallest embed is:
+
+```html
+<iframe
+  src="https://llbert.example.com"
+  title="LLBert linguistic landscape coordinate predictor"
+  loading="lazy"
+  style="width:100%; min-height:900px; border:0;"
+></iframe>
+```
+
+The app reads `LLBERT_MODEL_PATH`, `LLBERT_DATA_PATH`, and
+`LLBERT_ALLOWED_ORIGINS` when set, which is
+useful for a container or another host. Keep the model service separate from
+Hugo: Hugo is static, while prediction requires Python, PyTorch, and the
+sentence-transformer model. The model's predictions are approximate and should
+not be treated as precise geolocation.
 
 ## Command-line options and defaults
 

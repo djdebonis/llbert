@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LLBert | Linguistic landscape geoguesser</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    :root { --ink:#17211b; --moss:#315c48; --paper:#f4f1e8; --coral:#ef765d; --line:#bdc7b8; }
+    * { box-sizing:border-box; } body { margin:0; background:var(--paper); color:var(--ink); font-family:'Space Grotesk',sans-serif; }
+    main { max-width:900px; margin:auto; padding:clamp(28px,7vw,84px) 22px 48px; }
+    .eyebrow, label, .label, .status { font:500 .75rem 'DM Mono',monospace; letter-spacing:.08em; text-transform:uppercase; }
+    .eyebrow { color:var(--coral); } h1 { max-width:760px; margin:14px 0 18px; color:var(--moss); font-size:clamp(2.8rem,8vw,6.7rem); line-height:.9; letter-spacing:0; }
+    .lede { max-width:660px; font-size:1.1rem; line-height:1.5; } .switcher { display:flex; gap:8px; margin:44px 0 22px; }
+    button { border:1px solid var(--moss); border-radius:2px; padding:12px 16px; background:transparent; color:var(--moss); font:600 .95rem 'Space Grotesk',sans-serif; cursor:pointer; } button.active, button.primary { background:var(--moss); color:white; } button:hover { background:var(--coral); border-color:var(--coral); color:white; }
+    .panel { max-width:760px; border-top:2px solid var(--moss); padding-top:22px; } label { display:block; margin:18px 0 7px; }
+    textarea, input { width:100%; border:1px solid var(--line); border-radius:2px; background:#fbfaf5; padding:13px; color:var(--ink); font:1rem 'Space Grotesk',sans-serif; } textarea { min-height:130px; resize:vertical; }
+    .coords, .result { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; } .result { grid-template-columns:repeat(3,1fr); margin-top:34px; gap:18px; }
+    .actions { display:flex; align-items:center; flex-wrap:wrap; gap:14px; margin-top:20px; } .status { color:#68756b; letter-spacing:0; text-transform:none; }
+    .metric { border-top:1px solid var(--line); padding-top:10px; } .value { color:var(--moss); font:500 1.45rem 'DM Mono',monospace; } .label { color:#68756b; letter-spacing:0; }
+    .round-copy { line-height:1.5; white-space:pre-wrap; } .hidden { display:none; } .note { margin-top:44px; color:#68756b; font-size:.85rem; }
+    @media (max-width:600px) { h1 { font-size:3.35rem; } .coords, .result { grid-template-columns:1fr; } .switcher { margin-top:32px; } }
+  </style>
+</head>
+<body><main>
+  <div class="eyebrow">Linguistic Landscape BERT / coordinate regressor</div>
+  <h1>Where does the street put you?</h1>
+  <p class="lede">Give LLBert a bundle of text from signs at an intersection. Make a geographic prediction, then compare it with the model.</p>
+  <div class="switcher"><button id="open-tab" class="active">Open prediction</button><button id="round-tab">Random round</button></div>
+  <section id="open-panel" class="panel">
+    <label for="open-text">Sign text</label><textarea id="open-text" placeholder="taqueria | mercado | East Colfax Avenue | wireless | salon"></textarea>
+    <label>Your estimate</label><div class="coords"><input id="open-lat" type="number" min="-90" max="90" step=".00001" value="39.7392" aria-label="Latitude"><input id="open-lon" type="number" min="-180" max="180" step=".00001" value="-104.9903" aria-label="Longitude"></div>
+    <div class="actions"><button id="predict" class="primary">Run prediction</button><span id="open-status" class="status"></span></div><div id="open-result"></div>
+  </section>
+  <section id="round-panel" class="panel hidden"><div id="round-text" class="round-copy"></div><div class="coords"><input id="round-lat" type="number" min="-90" max="90" step=".00001" value="39.7392" aria-label="Latitude"><input id="round-lon" type="number" min="-180" max="180" step=".00001" value="-104.9903" aria-label="Longitude"></div><div class="actions"><button id="score" class="primary">Lock in guess</button><button id="next">New round</button><span id="round-status" class="status"></span></div><div id="round-result"></div></section>
+  <p class="note">LLBert is an experiment in geographic inference from linguistic landscape data. Predictions are approximate model output, not precise geolocation.</p>
+</main><script>
+const $ = id => document.getElementById(id); const API_BASE = window.LLBERT_API_URL || ''; let roundId; let roundText;
+const metric = (value, label) => `<div class="metric"><div class="value">${value}</div><div class="label">${label}</div></div>`;
+const request = async (url, options) => {
+  const response = await fetch(API_BASE + url, options);
+  const text = await response.text();
+  let payload = {};
+  if (text) {
+    try {
+      payload = JSON.parse(text);
+    } catch (error) {
+      payload = { detail: text || 'Request failed' };
+    }
+  }
+  if (!response.ok) throw new Error(payload.detail || 'Request failed');
+  return payload;
+};
+const json = data => ({method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+function distanceKm(lat1, lon1, lat2, lon2) { const r = Math.PI / 180, a = Math.sin((lat2-lat1)*r/2)**2 + Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin((lon2-lon1)*r/2)**2; return 6371.0088 * 2 * Math.asin(Math.sqrt(a)); }
+function showTab(round) { $('open-tab').classList.toggle('active', !round); $('round-tab').classList.toggle('active', round); $('open-panel').classList.toggle('hidden', round); $('round-panel').classList.toggle('hidden', !round); if (round && !roundId) newRound(); }
+async function newRound() { $('round-status').textContent = 'Loading a round...'; try { const data = await request('/api/round'); roundId = data.round_id; roundText = data.text; $('round-text').textContent = 'Decode this intersection\n\n' + roundText; $('round-result').innerHTML = ''; $('round-status').textContent = ''; } catch (error) { $('round-status').textContent = error.message; } }
+$('open-tab').onclick = () => showTab(false); $('round-tab').onclick = () => showTab(true); $('next').onclick = newRound;
+$('predict').onclick = async () => { const text = $('open-text').value.trim(); if (!text) return $('open-status').textContent = 'Add some sign text first.'; $('open-status').textContent = 'Reading the linguistic landscape...'; try { const data = await request('/api/predict', json({text})); const lat = Number($('open-lat').value), lon = Number($('open-lon').value); $('open-result').innerHTML = `<div class="result">${metric(data.latitude.toFixed(5)+', '+data.longitude.toFixed(5),'LLBert predicts')}${metric(lat.toFixed(5)+', '+lon.toFixed(5),'Your estimate')}${metric(distanceKm(lat, lon, data.latitude, data.longitude).toFixed(1)+' km','Great-circle error')}</div>`; $('open-status').textContent = ''; } catch (error) { $('open-status').textContent = error.message; } };
+$('score').onclick = async () => { $('round-status').textContent = 'Scoring the round...'; try { const data = await request('/api/round/score', json({text:roundText, round_id:roundId, latitude:Number($('round-lat').value), longitude:Number($('round-lon').value)})); $('round-result').innerHTML = `<div class="result">${metric(data.guess_error_km.toFixed(1)+' km','You were away')}${metric(data.model_error_km.toFixed(1)+' km','LLBert was away')}${metric(data.actual_latitude.toFixed(5)+', '+data.actual_longitude.toFixed(5),'Actual coordinates')}</div>`; $('round-status').textContent = ''; } catch (error) { $('round-status').textContent = error.message; } };
+</script></body></html>
