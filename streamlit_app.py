@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import pandas as pd
+import pydeck as pdk
 import streamlit as st
 
 from eval import get_device, load_model, predict
@@ -32,6 +33,53 @@ def predict_coordinates(text):
         encoder, head, [text.strip()], coord_mean, coord_std, device, batch_size=1
     )[0]
     return float(coordinates[0]), float(coordinates[1])
+
+
+def render_prediction_map(latitude, longitude, actual_latitude, actual_longitude):
+    points = pd.DataFrame(
+        {
+            "label": ["Model Guess", "Actual Coordinates"],
+            "latitude": [latitude, actual_latitude],
+            "longitude": [longitude, actual_longitude],
+            "color": [[217, 95, 2], [27, 158, 119]],
+        }
+    )
+    line = pd.DataFrame(
+        {
+            "source": [[longitude, latitude]],
+            "target": [[actual_longitude, actual_latitude]],
+        }
+    )
+    center_latitude = (latitude + actual_latitude) / 2
+    center_longitude = (longitude + actual_longitude) / 2
+    deck = pdk.Deck(
+        map_style=None,
+        initial_view_state=pdk.ViewState(
+            latitude=center_latitude,
+            longitude=center_longitude,
+            zoom=3.5,
+        ),
+        layers=[
+            pdk.Layer(
+                "LineLayer",
+                data=line,
+                get_source_position="source",
+                get_target_position="target",
+                get_color=[80, 80, 80, 180],
+                get_width=5,
+            ),
+            pdk.Layer(
+                "ScatterplotLayer",
+                data=points,
+                get_position="[longitude, latitude]",
+                get_fill_color="color",
+                get_radius=18000,
+                pickable=True,
+            ),
+        ],
+        tooltip={"text": "{label}"},
+    )
+    st.pydeck_chart(deck, use_container_width=True)
 
 
 def score_round(round_id, latitude, longitude):
@@ -72,31 +120,22 @@ with predict_tab:
             latitude, longitude = predict_coordinates(text)
             st.metric("Latitude", f"{latitude:.5f}")
             st.metric("Longitude", f"{longitude:.5f}")
-            points = pd.DataFrame(
-                {
-                    "label": ["Model Guess"],
-                    "latitude": [latitude],
-                    "longitude": [longitude],
-                    "color": ["#d95f02"],
-                }
-            )
             if include_actual:
-                points = pd.concat(
-                    [
-                        points,
-                        pd.DataFrame(
-                            {
-                                "label": ["Actual Coordinates"],
-                                "latitude": [actual_latitude],
-                                "longitude": [actual_longitude],
-                                "color": ["#1b9e77"],
-                            }
-                        ),
-                    ],
-                    ignore_index=True,
+                distance_km = float(
+                    haversine_km(
+                        np.array([[latitude, longitude]]),
+                        np.array([[actual_latitude, actual_longitude]]),
+                    )[0]
                 )
-            st.map(points, latitude="latitude", longitude="longitude", color="color")
-            st.caption("Orange: Model Guess | Green: Actual Coordinates")
+                st.metric("Distance between points", f"{distance_km:.1f} km")
+                render_prediction_map(
+                    latitude, longitude, actual_latitude, actual_longitude
+                )
+                st.caption("Orange: Model Guess | Green: Actual Coordinates")
+            else:
+                st.map(
+                    pd.DataFrame({"latitude": [latitude], "longitude": [longitude]})
+                )
 
 with round_tab:
     rounds = load_rounds()

@@ -13,5 +13,6 @@ torchvision>=0.17,<1
 transformers==5.15.0
 huggingface-hub>=1.5,<2
 streamlit>=1.40,<2
+pydeck>=0.8,<1
 fastapi>=0.110,<1
 uvicorn[standard]>=0.29,<1
