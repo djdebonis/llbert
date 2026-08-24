@@ -66,20 +66,20 @@ def render_prediction_map(latitude, longitude, actual_latitude, actual_longitude
                 get_source_position="source",
                 get_target_position="target",
                 get_color=[80, 80, 80, 180],
-                get_width=5,
+                get_width=2,
             ),
             pdk.Layer(
                 "ScatterplotLayer",
                 data=points,
                 get_position="[longitude, latitude]",
                 get_fill_color="color",
-                get_radius=18000,
+                get_radius=3500,
                 pickable=True,
             ),
         ],
         tooltip={"text": "{label}"},
     )
-    st.pydeck_chart(deck, use_container_width=True)
+    st.pydeck_chart(deck, width="stretch")
 
 
 def score_round(round_id, latitude, longitude):

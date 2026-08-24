@@ -69,7 +69,7 @@ def get_device(requested_device):
 
 def load_head(model_path, filename, encoder, config, device):
     head = CoordinateRegressor(
-        embedding_dim=encoder.get_sentence_embedding_dimension(),
+        embedding_dim=encoder.get_embedding_dimension(),
         hidden_dim=config["hidden_dim"],
         dropout=config["dropout"],
     ).to(device)
