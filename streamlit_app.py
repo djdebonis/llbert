@@ -56,6 +56,15 @@ predict_tab, round_tab = st.tabs(["Predict", "Challenge round"])
 
 with predict_tab:
     text = st.text_area("Sign text", placeholder="market | bakery | church")
+    include_actual = st.checkbox("Include actual coordinates", value=True)
+    actual_latitude = st.number_input(
+        "Actual latitude", min_value=-90.0, max_value=90.0, value=39.740084,
+        format="%.6f", disabled=not include_actual
+    )
+    actual_longitude = st.number_input(
+        "Actual longitude", min_value=-180.0, max_value=180.0, value=-104.986093,
+        format="%.6f", disabled=not include_actual
+    )
     if st.button("Predict coordinates", type="primary"):
         if not text.strip():
             st.warning("Enter some sign text first.")
@@ -63,7 +72,31 @@ with predict_tab:
             latitude, longitude = predict_coordinates(text)
             st.metric("Latitude", f"{latitude:.5f}")
             st.metric("Longitude", f"{longitude:.5f}")
-            st.map(pd.DataFrame({"latitude": [latitude], "longitude": [longitude]}))
+            points = pd.DataFrame(
+                {
+                    "label": ["Model Guess"],
+                    "latitude": [latitude],
+                    "longitude": [longitude],
+                    "color": ["#d95f02"],
+                }
+            )
+            if include_actual:
+                points = pd.concat(
+                    [
+                        points,
+                        pd.DataFrame(
+                            {
+                                "label": ["Actual Coordinates"],
+                                "latitude": [actual_latitude],
+                                "longitude": [actual_longitude],
+                                "color": ["#1b9e77"],
+                            }
+                        ),
+                    ],
+                    ignore_index=True,
+                )
+            st.map(points, latitude="latitude", longitude="longitude", color="color")
+            st.caption("Orange: Model Guess | Green: Actual Coordinates")
 
 with round_tab:
     rounds = load_rounds()
