@@ -12,7 +12,11 @@ import torch  # noqa: E402
 from sentence_transformers import SentenceTransformer  # noqa: E402
 
 from data_utils import split_indices  # noqa: E402
-from train import CoordinateRegressor, haversine_km  # noqa: E402
+from train import (  # noqa: E402
+    CoordinateRegressor,
+    haversine_km,
+    move_features_to_device,
+)
 
 matplotlib.use("Agg")
 from matplotlib import pyplot as plt  # noqa: E402
