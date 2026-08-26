@@ -3,8 +3,9 @@
 This project fine-tunes a sentence-transformer model to predict a latitude and
 longitude pair from text observed on signs at an intersection.
 
-The name **LLBert** is shorthand for *Linguistic Landscape BERT* (and, conveniently, *Latitude Longitude BERT*), a playful reference to the sentence-transformer encoder at the center of the project. 
-The model is an experiment in predicting geographic coordinates from Linguistic Landscape data, or the
+The name **LLBert** is shorthand for *Linguistic Landscape BERT* (and, conveniently, *Latitude Longitude BERT*), a playful reference to the inputs and outputs of the sentence-transformer encoder at the center of the project. 
+
+The model is an experiment in predicting geographic coordinates from linguistic Landscape data, or the
 language people encounter in public space.
 
 ## What is a Linguistic Landscape?
