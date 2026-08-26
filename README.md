@@ -23,7 +23,7 @@ Linguistic landscapes can be further defined as:
 
 As an example, let's look at an image of this sign from the University of Colorado Anschutz:
 
-![a photo of signage for the University of Colorado Anschutz Health Sciences Building outside of the building entryway with a large building int he back](content/images/anschutz_health_sciences_building_sign1.JPG)
+<img src="content/images/anschutz_health_sciences_building_sign1.JPG" alt="a photo of signage for the University of Colorado Anschutz Health Sciences Building outside of the building entryway with a large building int he back" style="width:300px;"/>
 
 There is a lot of data, or information, in this photo. Here, we can see the sign itself, pavement, a mulched garden bed, a road, buildings in the back, and more.
 
@@ -39,7 +39,7 @@ So, the "linguistic landscape" data of this view of this region contains that in
 
 For further clarification, let's look at another sign on the building:
 
-![image of a sign on the University of Colorado Anschutz Health Sciences Building above the entryway](content/images/anschutz_health_sciences_building_sign2.JPG)
+<img src="content/images/anschutz_health_sciences_building_sign2.JPG" alt="image of a sign on the University of Colorado Anschutz Health Sciences Building above the entryway" width="300"/>
 
 Here, we can read two pieces of linguistic data. First, there is the sign itself, which reads:
 
