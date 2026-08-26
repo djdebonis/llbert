@@ -1,12 +1,82 @@
-# Sign Coordinate Regressor
+# LLBert: Linguistic Landscape Coordinate Regressor
 
 This project fine-tunes a sentence-transformer model to predict a latitude and
 longitude pair from text observed on signs at an intersection.
 
-The name **LLBert** is shorthand for *Linguistic Landscape BERT*: a playful
-reference to the sentence-transformer encoder at the center of the project.
-The model is an experiment in predicting geographic coordinates from the
+The name **LLBert** is shorthand for *Linguistic Landscape BERT* (and, conveniently, *Latitude Longitude BERT*), a playful reference to the sentence-transformer encoder at the center of the project. 
+The model is an experiment in predicting geographic coordinates from Linguistic Landscape data, or the
 language people encounter in public space.
+
+## What is a Linguistic Landscape?
+
+In simple terms, a linguistic landscape is the sum of all of the written language in an environment. 
+
+Writing, unlike spoken language, is an artifact of society. It extends across time.
+
+The sum of the writing in an environment (especially a public environment) is referred to as a linguistic landscape. 
+
+Linguistic landscapes are often studied because—with the proper analysis—they are reflections of the diversity, culture, practices, perceptions, and values of a society. 
+
+Linguistic landscapes can be further defined as: 
+
+> "'The language of public road signs, advertising billboards, street names, place names, commercial shop signs, and public signs on government buildings combines to form the linguistic landscape of a given territory, region, or urban agglomeration'" (Landry & Bourhis,1997, p. 25, qtd. in SemiotiX, 2020). 
+
+As an example, let's look at an image of this sign from the University of Colorado Anschutz:
+
+![a photo of signage for the University of Colorado Anschutz Health Sciences Building outside of the building entryway with a large building int he back](content/images/anschutz_health_sciences_building_sign1.JPG)
+
+There is a lot of data, or information, in this photo. Here, we can see the sign itself, pavement, a mulched garden bed, a road, buildings in the back, and more.
+
+But if we were to ask: "what linguistic landscape data is in this image?" we could likely transcribe it as: 
+
+> CU
+> University of Colorado
+> ANSCHUTZ MEDICAL CAMPUS
+> ANSCHUTZ HEALTH SCIENCES BUILDING
+> 1890 NORTH REVER COURT
+
+So, the "linguistic landscape" data of this view of this region contains that information.
+
+For further clarification, let's look at another sign on the building:
+
+![image of a sign on the University of Colorado Anschutz Health Sciences Building above the entryway](content/images/anschutz_health_sciences_building_sign2.JPG)
+
+Here, we can read two pieces of linguistic data. First, there is the sign itself, which reads:
+
+> ANSCHUTZ HEALTH 
+> SCIENCES BUILDING
+
+Then, although they are flipped in orientation, there are the two exit signs, which read:
+
+> EXIT EXIT
+
+There is also a subtle reflection of text that appears to read 
+
+> ANSCHUTZ HEALTH SCIENCES VATORS
+
+Which presumably mentions something about the elevators.
+
+So, if we were to hypothetically say this was all of the linguistic landscape text outside this building (it's not, but for example), we could say the sum of the linguistic landscape outside of this building was:
+
+> CU
+> University of Colorado
+> ANSCHUTZ MEDICAL CAMPUS
+> ANSCHUTZ HEALTH SCIENCES BUILDING
+> 1890 NORTH REVER COURT
+> ANSCHUTZ HEALTH 
+> SCIENCES BUILDING
+> EXIT EXIT
+> ANSCHUTZ HEALTH SCIENCES VATORS
+
+Notice that there is repetition, and that is good information. Repetition is very common in languauage.
+
+Much reseach has been done into linguistic landscapes, and much research has been done into humanistic geography and the distribution of spoken language, but less research has been done into geosemiotics and geographical distributions of written language. 
+
+This project aims to better understand whether a Machine Learning method of Natural Language Processing (NLP) can accurately predict a geographical coordinate set (latitude, longitude) based on the linguistic landscape data surrounding an intesrsection.
+
+For the time being, the project will focus on the greater Denver Metro Area.
+
+## Inspiration for Project
 
 The raw dataset is expected at `training_data_raw.csv`. It may include the
 pandas-exported index column; the preprocessing script only uses:
