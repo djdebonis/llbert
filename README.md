@@ -79,6 +79,26 @@ For the time being, the project will focus on the greater Denver Metro Area.
 
 ## Inspiration for Project
 
+In high school, I loved playing a game called Hostage. The game began with two teams, with one designated home base. 
+
+Each team would have two sets of people: drivers/navigators, and hostages.
+
+At the beginning of the game, you would set a timer for generally 10-20 minutes. Each team would have that much time to take the other team's players to an unfamiliar location and drop them off. 
+
+The dropped-off hostages then had to work together to figure out where they were and, without using their GPS apps, call their drivers/navigators and explain to them ahd to get to them to pick them up.
+
+Whichever team made it back to home base with their full team first won.
+
+The game turned navigation into a kind of collaborative investigation. Street names, businesses, and public signs were some of the most useful clues because they gave us concrete information about our surroundings. A road sign could tell us the name of a place, a business could identify a neighborhood or intersection, and a cluster of signs could suggest the language, culture, or commercial character of an area. I was relying on the linguistic landscape around me to orient myself, even though I did not have that vocabulary for the process at the time.
+
+More recently, while playing the GeoGuessr app, I realized that one of my primary methods for predicting my location was also based on linguistic landscape data. I would look at street names, storefronts, advertisements, public notices, and other written signs, then combine those observations with the visual character of the surrounding area. Recognizing this pattern made me reflect on my own cognitive processes: how was I turning fragments of written language into a geographic intuition?
+
+These experiences led me to wonder whether linguistic data alone could be enough to predict geographical location. 
+
+LLBert is an attempt to investigate that question computationally. Rather than treating the model only as a geolocation system, I see it as a model of cognitive analysis: a way to examine whether the kinds of linguistic clues people use to orient themselves can be represented, learned, and used to estimate where a scene might be located.
+
+## Model Training Data
+
 The raw dataset is expected at `training_data_raw.csv`. It may include the
 pandas-exported index column; the preprocessing script only uses:
 
@@ -316,3 +336,17 @@ python generate_data.py \
   showing the prediction error.
 - `plots/predicted_vs_actual.png`: predicted vs actual latitude and longitude
   scatter plots.
+
+## References
+
+Ernst, P. (1969). The tongues of Italy: prehistory and history. Greenwood Press.
+
+Google (2020). Google Maps. Google. https://www.google.com/maps
+
+Huisman, J. L. A., Majid, A., & van Hout, R. (2019). The geographical configuration of a language area influences linguistic diversity. Public Libary of Science. 14(6).
+
+Metro Denver (2020). Communities. MetroDenver Economic Development Coorporation. *http://www.metrodenver.org/do-business/communities/
+
+SemiotiX (2020). The sociolinguisics of space and semiotic landscapes: An introduction. SemiotiX: A global information magazine. https://semioticon.com/semiotix/2013/05/the-sociolinguistics-of-space-and-semiotic-landscapes-an-introduction/
+
+Trudgill, P. (2000). “Chapter 5: Language and Context,” Sociolinguistics: An introduction to language and society. (4th ed., pp. 81-104). Penguin Books.
