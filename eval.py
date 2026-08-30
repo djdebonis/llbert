@@ -123,7 +123,7 @@ def predict(encoder, head, texts, coord_mean, coord_std, device, batch_size):
     predictions = []
     for start in range(0, len(texts), batch_size):
         batch = texts[start : start + batch_size]
-        features = encoder.preprocess(batch)
+        features = encoder.tokenize(batch)
         features = move_features_to_device(features, device)
         embeddings = encoder(features)["sentence_embedding"]
         batch_predictions = head(embeddings).cpu().numpy()

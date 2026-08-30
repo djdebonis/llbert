@@ -107,7 +107,39 @@ pandas-exported index column; the preprocessing script only uses:
 - `latitude`
 - `longitude`
 
+The project can also build this raw dataset directly from the source
+spreadsheets. Put the exported workbooks in `ll_sheets/` and place the
+intersection coordinate lookup at `coordinate_dict10.xlsx`. The lookup's DMS
+coordinate strings are converted to decimal latitude and longitude during
+aggregation.
+
 ## Workflow
+
+### From source spreadsheets
+
+Run the complete data-preparation flow from the project root:
+
+```bash
+source .venv/bin/activate
+python prepare_training_data.py \
+  --from-ll-sheets \
+  --sheet-dir ll_sheets \
+  --coord-file coordinate_dict10.xlsx \
+  --input-file training_data_raw.csv \
+  --output-file training.csv
+```
+
+This command reads every `.xlsx` file in `ll_sheets/`, cleans and combines the
+sign records, joins each intersection to `coordinate_dict10.xlsx`, and writes
+the two training stages:
+
+- `training_data_raw.csv`: cleaned sign-level records with coordinates.
+- `training.csv`: deterministic bootstrap bags used by the model trainer.
+
+The default command creates 100 samples per intersection, with 8 sign texts in
+each sample. Use `--bag-size`, `--samples-per-intersection`, and `--seed` to
+change those settings. To reuse an existing raw CSV instead, omit
+`--from-ll-sheets` and run the preparation command below.
 
 Prepare bootstrapped training rows:
 
@@ -217,6 +249,9 @@ Creates the bootstrapped training CSV from the raw sign data.
 | --- | --- | --- |
 | `-i`, `--input-file` | `training_data_raw.csv` | Raw pandas-exported CSV to read. |
 | `-o`, `--output-file` | `training.csv` | Prepared training dataset written by the script. |
+| `--from-ll-sheets` | `False` | Build the raw input from all `.xlsx` files in `--sheet-dir` and the coordinate workbook. |
+| `--sheet-dir` | `ll_sheets` | Directory containing source spreadsheet exports. |
+| `--coord-file` | `coordinate_dict10.xlsx` | Intersection-to-coordinate lookup workbook. |
 | `--seed` | `1992` | Random seed used for deterministic bootstrapping. |
 | `--bag-size` | `8` | Number of sign texts to combine into each training row. |
 | `--samples-per-intersection` | `100` | Number of bootstrap bags generated for each intersection. |
@@ -232,6 +267,15 @@ python prepare_training_data.py \
   --bag-size 5 \
   --samples-per-intersection 50 \
   --separator " | "
+```
+
+To rebuild both files from the source spreadsheets, use:
+
+```bash
+python prepare_training_data.py \
+  --from-ll-sheets \
+  --sheet-dir ll_sheets \
+  --coord-file coordinate_dict10.xlsx
 ```
 
 ### `train.py`

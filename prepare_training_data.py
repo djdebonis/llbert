@@ -1,7 +1,10 @@
 import argparse
 import random
+from pathlib import Path
 
 import pandas as pd
+
+from utils.cleaning import aggregate_ll_sheets
 
 BASE_COLUMNS = ["intersection", "text_on_sign_exact", "latitude", "longitude"]
 OPTIONAL_COLUMNS = ["code_type"]
@@ -23,6 +26,21 @@ def parse_args():
         "--output-file",
         default="training.csv",
         help="Prepared training CSV.",
+    )
+    parser.add_argument(
+        "--from-ll-sheets",
+        action="store_true",
+        help="Aggregate ll_sheets/*.xlsx and coordinate_dict10.xlsx into a raw training CSV.",
+    )
+    parser.add_argument(
+        "--sheet-dir",
+        default="ll_sheets",
+        help="Directory containing spreadsheet exports to aggregate.",
+    )
+    parser.add_argument(
+        "--coord-file",
+        default="coordinate_dict10.xlsx",
+        help="Workbook containing the intersection-to-coordinate lookup.",
     )
     parser.add_argument(
         "--seed",
@@ -66,6 +84,22 @@ def load_raw_data(path):
     data = data[data["text_on_sign_exact"] != ""]
     data = data[~data["intersection"].isin(EXCLUDED_INTERSECTIONS)]
     return data
+
+
+def build_raw_data_from_sheets(sheet_dir, coord_file, raw_output_path):
+    raw_data = aggregate_ll_sheets(sheet_dir, coord_file)
+    if raw_data.empty:
+        raise ValueError(f"No data found in {sheet_dir} / {coord_file}.")
+
+    raw_data = raw_data.rename(columns={"text_on_sign": "text_on_sign_exact"})
+    raw_data = raw_data[["intersection", "text_on_sign_exact", "latitude", "longitude"] + [c for c in ["code_type"] if c in raw_data.columns]].copy()
+    raw_data = raw_data.dropna(subset=["intersection", "text_on_sign_exact", "latitude", "longitude"])
+    raw_data = raw_data[raw_data["text_on_sign_exact"].astype(str).str.strip() != ""]
+    raw_data = raw_data[~raw_data["intersection"].isin(EXCLUDED_INTERSECTIONS)]
+
+    raw_data.to_csv(raw_output_path, index=False)
+    print(f"Wrote raw sheet aggregation to {raw_output_path}")
+    return raw_data
 
 
 def make_bootstrap_data(data, bag_size, samples_per_intersection, seed, separator):
@@ -124,7 +158,17 @@ def make_bootstrap_data(data, bag_size, samples_per_intersection, seed, separato
 
 def main():
     args = parse_args()
-    raw_data = load_raw_data(args.input_file)
+
+    if args.from_ll_sheets:
+        raw_path = Path(args.input_file)
+        raw_data = build_raw_data_from_sheets(
+            args.sheet_dir,
+            args.coord_file,
+            raw_path,
+        )
+    else:
+        raw_data = load_raw_data(args.input_file)
+
     training_data = make_bootstrap_data(
         raw_data,
         bag_size=args.bag_size,

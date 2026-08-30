@@ -234,7 +234,7 @@ def encode_texts(encoder, texts, batch_size, device):
     embeddings = []
     for start in range(0, len(texts), batch_size):
         batch = texts[start : start + batch_size]
-        features = encoder.preprocess(batch)
+        features = encoder.tokenize(batch)
         features = move_features_to_device(features, device)
         batch_embeddings = encoder(features)["sentence_embedding"]
         embeddings.append(batch_embeddings.cpu().numpy())
@@ -496,7 +496,7 @@ def main():
             pin_memory=pin_memory,
         )
     else:
-        text_collate = TextCollator(encoder.preprocess)
+        text_collate = TextCollator(encoder.tokenize)
         train_loader = make_dataloader(
             train_dataset,
             args.batch_size,
